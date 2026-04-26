@@ -19,11 +19,24 @@ export async function GET(request: NextRequest) {
       leadQuery = { assignedTo: user.userId };
     }
 
-    const [totalLeads, highPriority, mediumPriority, lowPriority, byStatus, agentStats] = await Promise.all([
+    const now = new Date();
+    const activeStatuses = { $nin: ['closed-won', 'closed-lost'] };
+    
+    const [totalLeads, highPriority, mediumPriority, lowPriority, overdueLeads, staleLeads, byStatus, agentStats] = await Promise.all([
       Lead.countDocuments(leadQuery),
       Lead.countDocuments({ ...leadQuery, score: 'high' }),
       Lead.countDocuments({ ...leadQuery, score: 'medium' }),
       Lead.countDocuments({ ...leadQuery, score: 'low' }),
+      Lead.countDocuments({ 
+        ...leadQuery, 
+        followUpDate: { $lt: now },
+        status: activeStatuses 
+      }),
+      Lead.countDocuments({
+        ...leadQuery,
+        lastActivityAt: { $lt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
+        status: activeStatuses,
+      }),
       Lead.aggregate([
         { $match: leadQuery as Record<string, unknown> },
         { $group: { _id: '$status', count: { $sum: 1 } } },
@@ -59,6 +72,8 @@ export async function GET(request: NextRequest) {
         highPriority,
         mediumPriority,
         lowPriority,
+        overdueLeads,
+        staleLeads,
         statusBreakdown,
         totalAgents,
       },

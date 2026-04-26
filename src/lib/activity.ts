@@ -2,7 +2,7 @@ import connectToDatabase from '@/lib/db';
 import { Activity } from '@/models/Activity';
 import { Lead } from '@/models/Lead';
 
-type ActivityAction = 'created' | 'status_updated' | 'assigned' | 'reassigned' | 'notes_updated' | 'followup_set' | 'followup_completed';
+type ActivityAction = 'created' | 'status_updated' | 'assigned' | 'reassigned' | 'notes_updated' | 'followup_set' | 'followup_completed' | 'updated' | 'deleted' | 'viewed';
 
 export async function logActivity(
   leadId: string,

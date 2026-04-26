@@ -1,10 +1,9 @@
-export type Role = 'admin' | 'manager' | 'agent';
+export type Role = 'admin' | 'agent';
 
-export const ROLES: Role[] = ['admin', 'manager', 'agent'];
+export const ROLES: Role[] = ['admin', 'agent'];
 
 export const ROLE_PERMISSIONS = {
   admin: ['create', 'read', 'update', 'delete', 'assign', 'view_all'],
-  manager: ['create', 'read', 'update', 'assign'],
   agent: ['create', 'read', 'update_own'],
 } as const;
 
@@ -14,11 +13,11 @@ export function hasPermission(role: Role, permission: string): boolean {
 }
 
 export function canViewAll(role: Role): boolean {
-  return role === 'admin' || role === 'manager';
+  return role === 'admin';
 }
 
 export function canAssign(role: Role): boolean {
-  return role === 'admin' || role === 'manager';
+  return role === 'admin';
 }
 
 export function isAdmin(role: Role): boolean {

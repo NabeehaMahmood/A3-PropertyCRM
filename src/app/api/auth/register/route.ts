@@ -5,7 +5,7 @@ import { hashPassword } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, role } = await request.json();
+    const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -24,15 +24,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hashedPassword = await hashPassword(password);
-    const userRole = role || 'agent';
+    const adminExists = await User.findOne({ role: 'admin' });
     
-    if (userRole !== 'admin' && userRole !== 'manager' && userRole !== 'agent') {
-      return NextResponse.json(
-        { error: 'Invalid role' },
-        { status: 400 }
-      );
-    }
+    const userRole = adminExists ? 'agent' : 'admin';
+
+    const hashedPassword = await hashPassword(password);
 
     const user = await User.create({
       name,
@@ -42,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: 'User created successfully',
+      message: userRole === 'admin' ? 'Admin account created' : 'Agent account created',
       user: {
         id: user._id,
         name: user.name,

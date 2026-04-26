@@ -6,12 +6,51 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { LeadCard } from '@/components/dashboard/LeadCard';
 import { FilterBar, FilterState } from '@/components/dashboard/FilterBar';
 
+const UsersIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+    <path d="M16 3.13a4 4 0 010 7.75"/>
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+  </svg>
+);
+
+const ChartIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M18 20V10"/>
+    <path d="M12 20V4"/>
+    <path d="M6 20v-6"/>
+  </svg>
+);
+
+const HomeIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+    <polyline points="9,22 9,12 15,12 15,22"/>
+  </svg>
+);
+
+const AlertIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [leads, setLeads] = useState<any[]>([]);
   const [filters, setFilters] = useState<FilterState>({ status: '', priority: '', dateRange: '' });
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [agentPerformance, setAgentPerformance] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,6 +92,7 @@ export default function DashboardPage() {
 
       if (dashboardData.stats) setStats(dashboardData.stats);
       if (leadsData.leads) setLeads(leadsData.leads);
+      if (dashboardData.agentPerformance) setAgentPerformance(dashboardData.agentPerformance);
     } catch (error) {
       console.error('Failed to fetch dashboard:', error);
     } finally {
@@ -68,84 +108,314 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        Loading...
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: 'var(--color-bg-primary)',
+      }}>
+        <div className="animate-pulse" style={{ textAlign: 'center' }}>
+          <div style={{ 
+            width: '3rem', 
+            height: '3rem', 
+            border: '3px solid var(--color-border)',
+            borderTopColor: 'var(--color-primary)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem',
+          }} />
+          <p style={{ color: 'var(--color-text-secondary)' }}>Loading dashboard...</p>
+        </div>
+        <style jsx global>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg-primary)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)' }}>
       {/* Header */}
-      <header style={{
-        padding: '16px 24px',
-        backgroundColor: 'var(--color-bg-card)',
-        borderBottom: '1px solid var(--color-border)',
+      <header className="glass" style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        padding: '1rem 1.5rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <h1 style={{ color: 'var(--color-forest)', fontSize: '20px', fontWeight: 600 }}>
-          PropertyCRM
-        </h1>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="/dashboard" style={{ color: 'var(--color-forest)', fontSize: '14px', fontWeight: 600 }}>Dashboard</a>
-          <a href="/leads" style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>Leads</a>
-          <a href="/overdue" style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>Follow-ups</a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <h1 style={{ 
+            fontSize: '1.25rem', 
+            fontWeight: 700, 
+            color: 'var(--color-primary)',
+            fontFamily: 'Cinzel, serif',
+          }}>
+            PropertyCRM
+          </h1>
+          <nav style={{ display: 'flex', gap: '1.5rem' }}>
+            <a 
+              href="/dashboard" 
+              style={{ 
+                color: 'var(--color-primary)', 
+                fontWeight: 600,
+                fontSize: '0.875rem',
+              }}
+            >
+              Dashboard
+            </a>
+            <a 
+              href="/leads" 
+              style={{ 
+                color: 'var(--color-text-secondary)', 
+                fontSize: '0.875rem',
+              }}
+            >
+              Leads
+            </a>
+            <a 
+              href="/overdue" 
+              style={{ 
+                color: 'var(--color-text-secondary)', 
+                fontSize: '0.875rem',
+              }}
+            >
+              Follow-ups
+            </a>
+            <a 
+              href="/activities" 
+              style={{ 
+                color: 'var(--color-text-secondary)', 
+                fontSize: '0.875rem',
+              }}
+            >
+              Activity Log
+            </a>
+          </nav>
         </div>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-            {user?.name} ({user?.role})
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {user?.name} <span style={{ 
+              textTransform: 'capitalize',
+              color: 'var(--color-primary)',
+              fontWeight: 500,
+            }}>({user?.role})</span>
           </span>
           <button
             onClick={handleLogout}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: 'transparent',
-              border: '1px solid var(--color-border)',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-            }}
+            className="btn btn-ghost"
+            style={{ border: '1px solid var(--color-border)' }}
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
             Logout
           </button>
         </div>
       </header>
 
       {/* Content */}
-      <main style={{ padding: '24px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '24px', color: 'var(--color-forest)' }}>
-          Dashboard
-        </h2>
+      <main style={{ padding: '1.5rem', maxWidth: '80rem', margin: '0 auto' }}>
+        {/* Page Title */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h2 style={{ 
+            fontSize: '1.75rem', 
+            fontWeight: 700, 
+            color: 'var(--color-text-primary)',
+            fontFamily: 'Cinzel, serif',
+            marginBottom: '0.25rem',
+          }}>
+            Dashboard
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+            Overview of your leads and performance
+          </p>
+        </div>
 
+        {/* Stats Grid */}
         {stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-            <StatCard title="Total Leads" value={stats.totalLeads || 0} />
-            <StatCard title="High Priority" value={stats.highPriority || 0} color="#8c5f5f" />
-            <StatCard title="Medium Priority" value={stats.mediumPriority || 0} color="#8c7c5f" />
-            <StatCard title="Low Priority" value={stats.lowPriority || 0} color="#5f6c7c" />
-            <StatCard title="Active Agents" value={stats.totalAgents || 0} />
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+            gap: '1rem', 
+            marginBottom: '2rem' 
+          }}>
+            <StatCard 
+              title="Total Leads" 
+              value={stats.totalLeads || 0} 
+              icon={<UsersIcon />}
+            />
+            <StatCard 
+              title="High Priority" 
+              value={stats.highPriority || 0} 
+              color="var(--color-priority-high)"
+              icon={<StarIcon />}
+            />
+            <StatCard 
+              title="Medium Priority" 
+              value={stats.mediumPriority || 0} 
+              color="var(--color-priority-medium)"
+              icon={<ChartIcon />}
+            />
+            <StatCard 
+              title="Low Priority" 
+              value={stats.lowPriority || 0} 
+              color="var(--color-priority-low)"
+              icon={<HomeIcon />}
+            />
+            <StatCard 
+              title="Active Agents" 
+              value={stats.totalAgents || 0} 
+              icon={<UsersIcon />}
+            />
+            {stats.overdueLeads > 0 && (
+              <StatCard 
+                title="Overdue Follow-ups" 
+                value={stats.overdueLeads || 0} 
+                color="var(--color-error)"
+                icon={<AlertIcon />}
+              />
+            )}
           </div>
         )}
 
+        {/* Filters */}
         <FilterBar onFilterChange={setFilters} />
 
-        <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>
-          Leads ({filteredLeads.length})
-        </h3>
-
-        <div style={{ display: 'grid', gap: '12px' }}>
-          {filteredLeads.map((lead: any) => (
-            <LeadCard key={lead._id} lead={lead} />
-          ))}
-        </div>
-
-        {filteredLeads.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '48px' }}>
-            No leads found
-          </p>
+        {/* Agent Performance - Admin only */}
+        {user?.role === 'admin' && agentPerformance.length > 0 && (
+          <div className="card" style={{ padding: '0', overflow: 'hidden', marginBottom: '2rem' }}>
+            <div style={{ 
+              padding: '1rem 1.5rem', 
+              borderBottom: '1px solid var(--color-border)',
+            }}>
+              <h3 style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: 600, 
+                color: 'var(--color-text-primary)',
+              }}>
+                Agent Performance
+              </h3>
+            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: 'var(--color-bg-secondary)' }}>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>Agent</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>Total Leads</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>Closed Won</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>In Progress</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>Win Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {agentPerformance
+                  .map((agent: any) => ({
+                    ...agent,
+                    winRate: agent.totalLeads > 0 ? Math.round((agent.closedWon / agent.totalLeads) * 100) : 0,
+                  }))
+                  .sort((a: any, b: any) => b.winRate - a.winRate)
+                  .map((agent: any, index: number) => {
+                    const starColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+                    return (
+                    <tr key={agent._id} style={{ borderTop: '1px solid var(--color-border)' }}>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {index < 3 ? (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill={starColors[index]}>
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                          ) : (
+                            <div style={{ width: '15px' }} />
+                          )}
+                          <span style={index >= 3 ? { marginLeft: '0.25rem' } : {}}>{agent.agentName}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: 'var(--color-text-secondary)' }}>{agent.totalLeads}</td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: 'var(--color-success)' }}>{agent.closedWon}</td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: 'var(--color-primary)' }}>{agent.inProgress}</td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                        <span style={{ 
+                          padding: '0.25rem 0.5rem', 
+                          borderRadius: '0.25rem',
+                          background: agent.winRate >= 50 ? 'rgba(16, 185, 129, 0.1)' : agent.winRate > 0 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          color: agent.winRate >= 50 ? 'var(--color-success)' : agent.winRate > 0 ? 'var(--color-warning)' : 'var(--color-error)',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                        }}>
+                          {agent.winRate}%
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
+
+        {/* Leads Section */}
+        <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+          <div style={{ 
+            padding: '1rem 1.5rem', 
+            borderBottom: '1px solid var(--color-border)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <h3 style={{ 
+              fontSize: '1.125rem', 
+              fontWeight: 600, 
+              color: 'var(--color-text-primary)',
+            }}>
+              Recent Leads
+            </h3>
+            <span style={{ 
+              fontSize: '0.875rem', 
+              color: 'var(--color-text-secondary)',
+              background: 'var(--color-bg-secondary)',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '9999px',
+            }}>
+              {filteredLeads.length} {filteredLeads.length === 1 ? 'lead' : 'leads'}
+            </span>
+          </div>
+
+          <div style={{ padding: '0.5rem' }}>
+            {filteredLeads.map((lead: any) => (
+              <LeadCard key={lead._id} lead={lead} />
+            ))}
+          </div>
+
+          {filteredLeads.length === 0 && (
+            <div style={{ 
+              padding: '3rem', 
+              textAlign: 'center',
+              color: 'var(--color-text-muted)',
+            }}>
+              <svg 
+                width="48" 
+                height="48" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="1.5"
+                style={{ margin: '0 auto 1rem', opacity: 0.5 }}
+              >
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="23" y1="11" x2="11" y2="11"/>
+              </svg>
+              <p>No leads found</p>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

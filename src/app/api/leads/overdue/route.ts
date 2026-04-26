@@ -16,26 +16,48 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const query: Record<string, unknown> = {
-      $or: [
-        { followUpDate: { $lt: now } },
-        { lastActivityAt: { $lt: sevenDaysAgo }, status: { $nin: ['closed-won', 'closed-lost'] } },
-      ],
-    };
-
+    let baseQuery: Record<string, unknown> = {};
     if (!canViewAll(user.role as Role)) {
-      query.assignedTo = user.userId;
+      baseQuery.assignedTo = user.userId;
     }
 
-    const overdueLeads = await Lead.find(query)
+    const closedStatuses = ['closed-won', 'closed-lost'];
+
+    // Find overdue leads (follow-up date in the past, not closed)
+    const overdueQuery = {
+      ...baseQuery,
+      followUpDate: { $lt: now },
+      status: { $nin: closedStatuses },
+    };
+    const overdueRaw = await Lead.find(overdueQuery)
       .populate('assignedTo', 'name email')
       .sort({ followUpDate: 1 });
+    
+    const overdue = overdueRaw.map(lead => ({
+      ...lead.toObject(),
+      followUpDate: lead.followUpDate?.toISOString(),
+      lastActivityAt: lead.lastActivityAt?.toISOString(),
+    }));
 
-    const overdue = overdueLeads.filter((lead) => !['closed-won', 'closed-lost'].includes(lead.status));
-    const stale = overdueLeads.filter((lead) => !lead.followUpDate || new Date(lead.lastActivityAt || 0) < sevenDaysAgo);
+    // Find stale leads (no activity for 7+ days, not closed)
+    const staleQuery = {
+      ...baseQuery,
+      lastActivityAt: { $lt: sevenDaysAgo },
+      status: { $nin: closedStatuses },
+    };
+    const staleRaw = await Lead.find(staleQuery)
+      .populate('assignedTo', 'name email')
+      .sort({ lastActivityAt: 1 });
+    
+    const stale = staleRaw.map(lead => ({
+      ...lead.toObject(),
+      followUpDate: lead.followUpDate?.toISOString(),
+      lastActivityAt: lead.lastActivityAt?.toISOString(),
+    }));
 
     return NextResponse.json({ overdue, stale });
   } catch (error) {
+    console.error('Error fetching overdue leads:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -8,10 +8,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState('agent');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isFirstUser, setIsFirstUser] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    checkAdminExists();
+  }, []);
+
+  const checkAdminExists = async () => {
+    try {
+      const res = await fetch('/api/auth/admin-exists');
+      const data = await res.json();
+      setIsFirstUser(!data.exists);
+    } catch (error) {
+      console.error('Error checking admin:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +36,7 @@ export default function LoginPage() {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const body = isLogin 
         ? { email, password } 
-        : { name, email, password, role };
+        : { name, email, password };
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -53,143 +67,213 @@ export default function LoginPage() {
     }
   };
 
-  const styles = {
-    container: {
+  return (
+    <div style={{
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'var(--color-bg-primary)',
-    },
-    card: {
-      width: '100%',
-      maxWidth: '400px',
-      padding: '32px',
-      backgroundColor: 'var(--color-bg-card)',
-      borderRadius: '8px',
-      border: '1px solid var(--color-border)',
-    },
-    title: {
-      fontSize: '24px',
-      fontWeight: 600,
-      color: 'var(--color-forest)',
-      marginBottom: '24px',
-      textAlign: 'center' as const,
-    },
-    input: {
-      width: '100%',
-      padding: '12px',
-      marginBottom: '16px',
-      border: '1px solid var(--color-border)',
-      borderRadius: '4px',
-      fontSize: '14px',
-    },
-    select: {
-      width: '100%',
-      padding: '12px',
-      marginBottom: '16px',
-      border: '1px solid var(--color-border)',
-      borderRadius: '4px',
-      fontSize: '14px',
-    },
-    button: {
-      width: '100%',
-      padding: '12px',
-      backgroundColor: 'var(--color-forest)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '4px',
-      fontSize: '16px',
-      fontWeight: 600,
-      cursor: loading ? 'not-allowed' : 'pointer',
-      opacity: loading ? 0.7 : 1,
-    },
-    error: {
-      color: 'var(--color-error)',
-      fontSize: '14px',
-      marginBottom: '16px',
-    },
-    toggle: {
-      marginTop: '16px',
-      textAlign: 'center' as const,
-      fontSize: '14px',
-    },
-    toggleBtn: {
-      background: 'none',
-      border: 'none',
-      color: 'var(--color-forest)',
-      cursor: 'pointer',
-      textDecoration: 'underline',
-    },
-  };
+      background: 'linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%)',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Decorative background circles */}
+      <div style={{
+        position: 'absolute',
+        top: '-20%',
+        left: '-10%',
+        width: '50%',
+        height: '50%',
+        background: 'radial-gradient(circle, rgba(15, 118, 110, 0.15) 0%, transparent 70%)',
+        borderRadius: '50%',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '-20%',
+        right: '-10%',
+        width: '60%',
+        height: '60%',
+        background: 'radial-gradient(circle, rgba(3, 105, 161, 0.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        pointerEvents: 'none',
+      }} />
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>
-          {isLogin ? 'PropertyCRM Login' : 'Create Account'}
-        </h1>
+      {/* Glass card */}
+      <div className="glass animate-scaleIn" style={{
+        width: '100%',
+        maxWidth: '420px',
+        margin: '1rem',
+        padding: '2.5rem',
+        borderRadius: '1.5rem',
+        boxShadow: 'var(--shadow-glass)',
+      }}>
+        {/* Logo / Title */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h1 style={{ 
+            fontSize: '1.75rem', 
+            fontWeight: 700, 
+            color: 'var(--color-primary)',
+            marginBottom: '0.5rem',
+          }}>
+            PropertyCRM
+          </h1>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+            {isLogin ? 'Welcome back! Please sign in.' : 'Create your account to get started.'}
+          </p>
+        </div>
 
-        {error && <p style={styles.error}>{error}</p>}
+        {error && (
+          <div style={{
+            background: 'rgba(220, 38, 38, 0.1)',
+            border: '1px solid var(--color-error)',
+            color: 'var(--color-error)',
+            padding: '0.75rem 1rem',
+            borderRadius: '0.5rem',
+            fontSize: '0.875rem',
+            marginBottom: '1.5rem',
+          }}>
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           {!isLogin && (
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={styles.input}
-              required={!isLogin}
-            />
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                marginBottom: '0.375rem',
+                color: 'var(--color-text-primary)',
+              }}>
+                Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required={!isLogin}
+                style={{
+                  background: 'var(--color-bg-card)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '0.5rem',
+                }}
+              />
+            </div>
           )}
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-            required
-          />
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              marginBottom: '0.375rem',
+              color: 'var(--color-text-primary)',
+            }}>
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                background: 'var(--color-bg-card)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '0.5rem',
+              }}
+            />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-            required
-          />
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              marginBottom: '0.375rem',
+              color: 'var(--color-text-primary)',
+            }}>
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                background: 'var(--color-bg-card)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '0.5rem',
+              }}
+            />
+          </div>
 
           {!isLogin && (
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              style={styles.select}
-            >
-              <option value="agent">Agent</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-            </select>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p style={{
+                fontSize: '0.875rem',
+                color: 'var(--color-text-muted)',
+                marginTop: '0.5rem',
+              }}>
+                {isFirstUser ? 'You will be registered as Admin' : 'You will be registered as Agent'}
+              </p>
+            </div>
           )}
 
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? 'Please wait...' : isLogin ? 'Login' : 'Register'}
+          <button 
+            type="submit" 
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ width: '100%', height: '2.75rem', fontSize: '1rem' }}
+          >
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <svg style={{ animation: 'spin 1s linear infinite', width: '1rem', height: '1rem' }} viewBox="0 0 24 24" fill="none">
+                  <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Processing...
+              </span>
+            ) : isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
 
-        <p style={styles.toggle}>
+        <p style={{
+          textAlign: 'center',
+          fontSize: '0.875rem',
+          marginTop: '1.5rem',
+          color: 'var(--color-text-secondary)',
+        }}>
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            style={styles.toggleBtn}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--color-primary)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              padding: 0,
+              marginLeft: '0.25rem',
+            }}
           >
-            {isLogin ? 'Register' : 'Login'}
+            {isLogin ? 'Sign Up' : 'Sign In'}
           </button>
         </p>
       </div>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

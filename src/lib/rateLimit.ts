@@ -11,8 +11,7 @@ const store: RateLimitStore = {};
 
 const RATE_LIMITS: Record<string, { requests: number; windowMs: number }> = {
   agent: { requests: 50, windowMs: 60000 },
-  manager: { requests: 100, windowMs: 60000 },
-  admin: { requests: 500, windowMs: 60000 },
+  admin: { requests: 1000, windowMs: 60000 },
   default: { requests: 30, windowMs: 60000 },
 };
 

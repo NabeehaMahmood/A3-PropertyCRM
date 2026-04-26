@@ -42,26 +42,39 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
     onFilterChange(newFilters);
   };
 
+  const selectStyle: React.CSSProperties = {
+    padding: '0.5rem 2rem 0.5rem 0.75rem',
+    border: '1px solid var(--color-border)',
+    borderRadius: '0.5rem',
+    backgroundColor: 'var(--color-bg-card)',
+    fontSize: '0.875rem',
+    color: 'var(--color-text-primary)',
+    cursor: 'pointer',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23134E4A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0.5rem center',
+    backgroundSize: '1rem',
+  };
+
   return (
-    <div style={{
+    <div className="card" style={{
+      padding: '1rem 1.5rem',
       display: 'flex',
-      gap: '12px',
       flexWrap: 'wrap',
-      marginBottom: '16px',
-      padding: '12px',
-      backgroundColor: 'var(--color-bg-secondary)',
-      borderRadius: '8px',
+      alignItems: 'center',
+      gap: '0.75rem',
+      marginBottom: '1.5rem',
     }}>
+      <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+        Filters:
+      </span>
+      
       <select
         value={filters.status}
         onChange={(e) => handleChange('status', e.target.value)}
-        style={{
-          padding: '8px 12px',
-          border: '1px solid var(--color-border)',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          fontSize: '14px',
-        }}
+        style={selectStyle}
       >
         {statusOptions.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -73,13 +86,7 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
       <select
         value={filters.priority}
         onChange={(e) => handleChange('priority', e.target.value)}
-        style={{
-          padding: '8px 12px',
-          border: '1px solid var(--color-border)',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          fontSize: '14px',
-        }}
+        style={selectStyle}
       >
         {priorityOptions.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -91,19 +98,34 @@ export function FilterBar({ onFilterChange }: FilterBarProps) {
       <select
         value={filters.dateRange}
         onChange={(e) => handleChange('dateRange', e.target.value)}
-        style={{
-          padding: '8px 12px',
-          border: '1px solid var(--color-border)',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          fontSize: '14px',
-        }}
+        style={{ ...selectStyle, minWidth: '120px' }}
       >
         <option value="">All Time</option>
         <option value="today">Today</option>
         <option value="week">This Week</option>
         <option value="month">This Month</option>
       </select>
+
+      {(filters.status || filters.priority || filters.dateRange) && (
+        <button
+          onClick={() => {
+            const emptyFilters = { status: '', priority: '', dateRange: '' };
+            setFilters(emptyFilters);
+            onFilterChange(emptyFilters);
+          }}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--color-error)',
+            fontSize: '0.875rem',
+            cursor: 'pointer',
+            padding: '0.25rem 0.5rem',
+            fontWeight: 500,
+          }}
+        >
+          Clear
+        </button>
+      )}
     </div>
   );
 }
