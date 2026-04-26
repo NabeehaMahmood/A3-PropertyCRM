@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const activeStatuses = { $nin: ['closed-won', 'closed-lost'] };
     
-    const [totalLeads, highPriority, mediumPriority, lowPriority, overdueLeads, staleLeads, byStatus, agentStats] = await Promise.all([
+    const [totalLeads, highPriority, mediumPriority, lowPriority, overdueLeads, staleLeads, byStatus, bySource, agentStats] = await Promise.all([
       Lead.countDocuments(leadQuery),
       Lead.countDocuments({ ...leadQuery, score: 'high' }),
       Lead.countDocuments({ ...leadQuery, score: 'medium' }),
@@ -40,6 +40,10 @@ export async function GET(request: NextRequest) {
       Lead.aggregate([
         { $match: leadQuery as Record<string, unknown> },
         { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      Lead.aggregate([
+        { $match: leadQuery as Record<string, unknown> },
+        { $group: { _id: '$source', count: { $sum: 1 } } },
       ]),
       canViewAll(user.role as Role)
         ? Lead.aggregate([
@@ -64,6 +68,11 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {} as Record<string, number>);
 
+    const sourceBreakdown = bySource.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {} as Record<string, number>);
+
     const totalAgents = await User.countDocuments({ role: 'agent' });
 
     return NextResponse.json({
@@ -75,6 +84,7 @@ export async function GET(request: NextRequest) {
         overdueLeads,
         staleLeads,
         statusBreakdown,
+        sourceBreakdown,
         totalAgents,
       },
       agentPerformance: agentStats,

@@ -283,6 +283,108 @@ export default function DashboardPage() {
                 icon={<AlertIcon />}
               />
             )}
+            {stats.statusBreakdown && (
+              <>
+                <StatCard 
+                  title="Contacted" 
+                  value={stats.statusBreakdown.contacted || 0} 
+                  color="var(--color-primary)"
+                  icon={<ChartIcon />}
+                />
+                <StatCard 
+                  title="Qualified" 
+                  value={stats.statusBreakdown.qualified || 0} 
+                  color="var(--color-priority-medium)"
+                  icon={<StarIcon />}
+                />
+                <StatCard 
+                  title="In Negotiation" 
+                  value={stats.statusBreakdown.negotiation || 0} 
+                  color="var(--color-warning)"
+                  icon={<ChartIcon />}
+                />
+                <StatCard 
+                  title="Closed Won" 
+                  value={stats.statusBreakdown['closed-won'] || 0} 
+                  color="var(--color-success)"
+                  icon={<StarIcon />}
+                />
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Analytics Section - Admin only */}
+        {user?.role === 'admin' && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ 
+              fontSize: '1.125rem', 
+              fontWeight: 600, 
+              color: 'var(--color-text-primary)',
+              marginBottom: '1rem',
+            }}>
+              Lead Distribution Analysis ({filteredLeads.length} leads)
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+              <div className="card" style={{ padding: '1.5rem' }}>
+                <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '1rem', textTransform: 'uppercase' }}>
+                  By Status
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {[
+                    { label: 'New', key: 'new', color: 'var(--color-primary)' },
+                    { label: 'Contacted', key: 'contacted', color: 'var(--color-priority-medium)' },
+                    { label: 'Qualified', key: 'qualified', color: '#8B5CF6' },
+                    { label: 'Negotiation', key: 'negotiation', color: 'var(--color-warning)' },
+                    { label: 'Closed Won', key: 'closed-won', color: 'var(--color-success)' },
+                    { label: 'Closed Lost', key: 'closed-lost', color: 'var(--color-error)' },
+                  ].map(item => {
+                    const count = filteredLeads.filter(l => l.status === item.key).length;
+                    const total = filteredLeads.length || 1;
+                    const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={item.key}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                          <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>{item.label}</span>
+                          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>{count} ({percent}%)</span>
+                        </div>
+                        <div style={{ height: '8px', background: 'var(--color-bg-secondary)', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: `${percent}%`, height: '100%', background: item.color, borderRadius: '4px' }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="card" style={{ padding: '1.5rem' }}>
+                <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '1rem', textTransform: 'uppercase' }}>
+                  By Priority
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {[
+                    { label: 'High', key: 'high', color: 'var(--color-priority-high)' },
+                    { label: 'Medium', key: 'medium', color: 'var(--color-priority-medium)' },
+                    { label: 'Low', key: 'low', color: 'var(--color-priority-low)' },
+                  ].map(item => {
+                    const count = filteredLeads.filter(l => l.score === item.key).length;
+                    const total = filteredLeads.length || 1;
+                    const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={item.key}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                          <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>{item.label} Priority</span>
+                          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>{count} ({percent}%)</span>
+                        </div>
+                        <div style={{ height: '8px', background: 'var(--color-bg-secondary)', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: `${percent}%`, height: '100%', background: item.color, borderRadius: '4px' }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -359,63 +461,6 @@ export default function DashboardPage() {
             </table>
           </div>
         )}
-
-        {/* Leads Section */}
-        <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-          <div style={{ 
-            padding: '1rem 1.5rem', 
-            borderBottom: '1px solid var(--color-border)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <h3 style={{ 
-              fontSize: '1.125rem', 
-              fontWeight: 600, 
-              color: 'var(--color-text-primary)',
-            }}>
-              Recent Leads
-            </h3>
-            <span style={{ 
-              fontSize: '0.875rem', 
-              color: 'var(--color-text-secondary)',
-              background: 'var(--color-bg-secondary)',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '9999px',
-            }}>
-              {filteredLeads.length} {filteredLeads.length === 1 ? 'lead' : 'leads'}
-            </span>
-          </div>
-
-          <div style={{ padding: '0.5rem' }}>
-            {filteredLeads.map((lead: any) => (
-              <LeadCard key={lead._id} lead={lead} />
-            ))}
-          </div>
-
-          {filteredLeads.length === 0 && (
-            <div style={{ 
-              padding: '3rem', 
-              textAlign: 'center',
-              color: 'var(--color-text-muted)',
-            }}>
-              <svg 
-                width="48" 
-                height="48" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="1.5"
-                style={{ margin: '0 auto 1rem', opacity: 0.5 }}
-              >
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <line x1="23" y1="11" x2="11" y2="11"/>
-              </svg>
-              <p>No leads found</p>
-            </div>
-          )}
-        </div>
       </main>
     </div>
   );
