@@ -41,14 +41,14 @@ export const activitySchema = z.object({
   leadId: z.string().min(1, 'Lead ID is required'),
   action: z.enum(['created', 'status_updated', 'assigned', 'reassigned', 'notes_updated', 'followup_set', 'followup_completed']),
   description: z.string().min(1, 'Description is required'),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export function validateBody<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; error: string } {
   const result = schema.safeParse(data);
   
   if (!result.success) {
-    const errors = result.error.errors.map((e) => e.message).join(', ');
+    const errors = result.error.issues.map((e) => e.message).join(', ');
     return { success: false, error: errors };
   }
   
@@ -59,7 +59,7 @@ export function validateParams<T>(schema: z.ZodSchema<T>, params: unknown): { su
   const result = schema.safeParse(params);
   
   if (!result.success) {
-    const errors = result.error.errors.map((e) => e.message).join(', ');
+    const errors = result.error.issues.map((e) => e.message).join(', ');
     return { success: false, error: errors };
   }
   

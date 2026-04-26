@@ -9,7 +9,7 @@ interface RateLimitStore {
 
 const store: RateLimitStore = {};
 
-const RATE_LIMITS = {
+const RATE_LIMITS: Record<string, { requests: number; windowMs: number }> = {
   agent: { requests: 50, windowMs: 60000 },
   manager: { requests: 100, windowMs: 60000 },
   admin: { requests: 500, windowMs: 60000 },
