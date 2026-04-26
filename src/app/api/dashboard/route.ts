@@ -3,7 +3,7 @@ import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { User } from '@/models/User';
 import { getCurrentUser } from '@/lib/session';
-import { canViewAll } from '@/lib/rbac';
+import { canViewAll, Role } from '@/lib/rbac';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     await connectToDatabase();
 
     let leadQuery = {};
-    if (!canViewAll(user.role)) {
+    if (!canViewAll(user.role as Role)) {
       leadQuery = { assignedTo: user.userId };
     }
 

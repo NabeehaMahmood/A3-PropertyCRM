@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { getCurrentUser } from '@/lib/session';
-import { canViewAll } from '@/lib/rbac';
+import { canViewAll, Role } from '@/lib/rbac';
 
 function calculateScore(budget: string): 'high' | 'medium' | 'low' {
   const budgetNumber = parseInt(budget.replace(/[^0-9]/g, '')) || 0;
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     await connectToDatabase();
 
     let query = {};
-    if (!canViewAll(user.role)) {
+    if (!canViewAll(user.role as Role)) {
       query = { assignedTo: user.userId };
     }
 

@@ -9,8 +9,8 @@ export const ROLE_PERMISSIONS = {
 } as const;
 
 export function hasPermission(role: Role, permission: string): boolean {
-  const permissions = ROLE_PERMISSIONS[role];
-  return permissions.includes(permission as keyof typeof permissions);
+  const permissions = ROLE_PERMISSIONS[role] as readonly string[];
+  return permissions.includes(permission);
 }
 
 export function canViewAll(role: Role): boolean {

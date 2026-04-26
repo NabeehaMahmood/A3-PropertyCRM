@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/session';
 import { Role, isAdmin, canViewAll, canAssign } from '@/lib/rbac';
 
-export { Role, isAdmin, canViewAll, canAssign };
+export type { Role };
+export { isAdmin, canViewAll, canAssign };
 
 export async function authMiddleware(
   request: NextRequest,

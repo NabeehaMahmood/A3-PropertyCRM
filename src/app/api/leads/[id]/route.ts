@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { getCurrentUser } from '@/lib/session';
-import { canViewAll } from '@/lib/rbac';
+import { canViewAll, Role } from '@/lib/rbac';
 import mongoose from 'mongoose';
 
 export async function GET(
@@ -20,7 +20,7 @@ export async function GET(
     await connectToDatabase();
 
     const query = { _id: id } as Record<string, unknown>;
-    if (!canViewAll(user.role)) {
+    if (!canViewAll(user.role as Role)) {
       query.assignedTo = user.userId;
     }
 
@@ -52,7 +52,7 @@ export async function PUT(
     await connectToDatabase();
 
     const query = { _id: id } as Record<string, unknown>;
-    if (!canViewAll(user.role)) {
+    if (!canViewAll(user.role as Role)) {
       query.assignedTo = user.userId;
     }
 

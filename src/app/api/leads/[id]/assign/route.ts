@@ -3,7 +3,7 @@ import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { User } from '@/models/User';
 import { getCurrentUser } from '@/lib/session';
-import { canAssign } from '@/lib/rbac';
+import { canAssign, Role } from '@/lib/rbac';
 
 export async function PATCH(
   request: NextRequest,
@@ -15,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!canAssign(user.role)) {
+    if (!canAssign(user.role as Role)) {
       return NextResponse.json({ error: 'Forbidden - Only admins and managers can assign leads' }, { status: 403 });
     }
 
