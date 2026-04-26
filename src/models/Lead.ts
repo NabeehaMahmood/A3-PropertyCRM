@@ -10,6 +10,8 @@ export interface ILead extends Document {
   assignedTo: mongoose.Types.ObjectId;
   notes: string;
   score: 'high' | 'medium' | 'low';
+  followUpDate?: Date;
+  lastActivityAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +35,8 @@ const LeadSchema = new Schema<ILead>(
       enum: ['high', 'medium', 'low'], 
       default: 'low' 
     },
+    followUpDate: { type: Date },
+    lastActivityAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       leadQuery = { assignedTo: user.userId };
     }
 
-    const [totalLeads, highPriority, mediumPriority, lowPriority, byStatus] = await Promise.all([
+    const [totalLeads, highPriority, mediumPriority, lowPriority, byStatus, agentStats] = await Promise.all([
       Lead.countDocuments(leadQuery),
       Lead.countDocuments({ ...leadQuery, score: 'high' }),
       Lead.countDocuments({ ...leadQuery, score: 'medium' }),
@@ -28,6 +28,22 @@ export async function GET(request: NextRequest) {
         { $match: leadQuery as Record<string, unknown> },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
+      canViewAll(user.role as Role)
+        ? Lead.aggregate([
+            { $match: { assignedTo: { $ne: null } } },
+            {
+              $group: {
+                _id: '$assignedTo',
+                totalLeads: { $sum: 1 },
+                closedWon: { $sum: { $cond: [{ $eq: ['$status', 'closed-won'] }, 1, 0] } },
+                inProgress: { $sum: { $cond: [{ $eq: ['$status', 'negotiation'] }, 1, 0] } },
+              },
+            },
+            { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'agent' } },
+            { $unwind: '$agent' },
+            { $project: { agentName: '$agent.name', totalLeads: 1, closedWon: 1, inProgress: 1 } },
+          ])
+        : Promise.resolve([]),
     ]);
 
     const statusBreakdown = byStatus.reduce((acc, item) => {
@@ -46,6 +62,7 @@ export async function GET(request: NextRequest) {
         statusBreakdown,
         totalAgents,
       },
+      agentPerformance: agentStats,
     });
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
