@@ -9,6 +9,7 @@ export interface ILead extends Document {
   status: 'new' | 'contacted' | 'qualified' | 'negotiation' | 'closed-won' | 'closed-lost';
   assignedTo: mongoose.Types.ObjectId;
   notes: string;
+  score: 'high' | 'medium' | 'low';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +28,11 @@ const LeadSchema = new Schema<ILead>(
     },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     notes: { type: String, default: '' },
+    score: { 
+      type: String, 
+      enum: ['high', 'medium', 'low'], 
+      default: 'low' 
+    },
   },
   { timestamps: true }
 );
