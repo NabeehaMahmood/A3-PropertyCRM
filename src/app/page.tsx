@@ -1,6 +1,20 @@
-import "./globals.css";
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      router.push('/dashboard');
+    } else {
+      router.push('/login');
+    }
+  }, [router]);
+
   return (
     <main style={{ 
       minHeight: '100vh', 
@@ -9,19 +23,7 @@ export default function Home() {
       justifyContent: 'center',
       backgroundColor: 'var(--color-bg-primary)'
     }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ 
-          color: 'var(--color-forest)', 
-          fontSize: '2rem',
-          fontWeight: 600,
-          marginBottom: '0.5rem'
-        }}>
-          PropertyCRM
-        </h1>
-        <p style={{ color: 'var(--color-text-secondary)' }}>
-          Property Deal Management System
-        </p>
-      </div>
+      <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
     </main>
   );
 }
