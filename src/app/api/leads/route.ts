@@ -3,6 +3,7 @@ import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { getCurrentUser } from '@/lib/session';
 import { canViewAll, Role } from '@/lib/rbac';
+import { sendNewLeadNotification } from '@/lib/email';
 
 function calculateScore(budget: string): 'high' | 'medium' | 'low' {
   const budgetNumber = parseInt(budget.replace(/[^0-9]/g, '')) || 0;
@@ -64,6 +65,15 @@ export async function POST(request: NextRequest) {
     });
 
     await lead.populate('assignedTo', 'name email');
+
+    sendNewLeadNotification({
+      leadName: name,
+      leadEmail: email,
+      leadPhone: phone,
+      propertyInterest,
+      budget,
+      agentName: (lead.assignedTo as unknown as { name: string }).name,
+    }).catch(console.error);
 
     return NextResponse.json({ message: 'Lead created', lead });
   } catch (error) {

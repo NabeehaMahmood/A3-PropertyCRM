@@ -4,6 +4,7 @@ import { Lead } from '@/models/Lead';
 import { User } from '@/models/User';
 import { getCurrentUser } from '@/lib/session';
 import { canAssign, Role } from '@/lib/rbac';
+import { sendLeadAssignmentNotification } from '@/lib/email';
 
 export async function PATCH(
   request: NextRequest,
@@ -42,6 +43,15 @@ export async function PATCH(
     if (!lead) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
+
+    sendLeadAssignmentNotification({
+      leadName: lead.name,
+      leadEmail: lead.email,
+      leadPhone: lead.phone,
+      propertyInterest: lead.propertyInterest,
+      budget: lead.budget,
+      agentName: agent.name,
+    }).catch(console.error);
 
     return NextResponse.json({ message: 'Lead assigned', lead });
   } catch (error) {
