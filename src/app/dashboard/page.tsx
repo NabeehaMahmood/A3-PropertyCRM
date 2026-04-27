@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { LeadCard } from '@/components/dashboard/LeadCard';
 import { FilterBar, FilterState } from '@/components/dashboard/FilterBar';
@@ -46,6 +46,14 @@ const AlertIcon = () => (
 );
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
   const [stats, setStats] = useState<any>(null);
   const [leads, setLeads] = useState<any[]>([]);
   const [filters, setFilters] = useState<FilterState>({ status: '', priority: '', dateRange: '' });
