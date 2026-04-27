@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { LeadCard } from '@/components/dashboard/LeadCard';
@@ -79,7 +80,7 @@ export default function DashboardPage() {
     try {
       const [dashboardRes, leadsRes] = await Promise.all([
         fetch('/api/dashboard', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
-        fetch('/api/leads', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+        fetch('/api/leads?limit=100', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
       ]);
 
       const dashboardData = await dashboardRes.json();
@@ -100,11 +101,11 @@ export default function DashboardPage() {
     }
   };
 
-  const filteredLeads = leads.filter((lead: any) => {
+  const filteredLeads = user?.role === 'admin' ? leads.filter((lead: any) => {
     if (filters.status && lead.status !== filters.status) return false;
     if (filters.priority && lead.score !== filters.priority) return false;
     return true;
-  });
+  }) : leads;
 
   if (loading) {
     return (
@@ -159,7 +160,7 @@ export default function DashboardPage() {
             PropertyCRM
           </h1>
           <nav style={{ display: 'flex', gap: '1.5rem' }}>
-            <a 
+            <Link 
               href="/dashboard" 
               style={{ 
                 color: 'var(--color-primary)', 
@@ -168,8 +169,8 @@ export default function DashboardPage() {
               }}
             >
               Dashboard
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/leads" 
               style={{ 
                 color: 'var(--color-text-secondary)', 
@@ -177,8 +178,8 @@ export default function DashboardPage() {
               }}
             >
               Leads
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/overdue" 
               style={{ 
                 color: 'var(--color-text-secondary)', 
@@ -186,8 +187,8 @@ export default function DashboardPage() {
               }}
             >
               Follow-ups
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/activities" 
               style={{ 
                 color: 'var(--color-text-secondary)', 
@@ -195,7 +196,7 @@ export default function DashboardPage() {
               }}
             >
               Activity Log
-            </a>
+            </Link>
           </nav>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -388,8 +389,25 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Filters */}
-        <FilterBar onFilterChange={setFilters} />
+        {/* Filters - Admin only */}
+        {user?.role === 'admin' && <FilterBar onFilterChange={setFilters} />}
+
+        {/* Leads List with WhatsApp */}
+        {filteredLeads.length > 0 && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ 
+              fontSize: '1.125rem', 
+              fontWeight: 600, 
+              color: 'var(--color-text-primary)',
+              marginBottom: '1rem',
+            }}>
+              Your Leads - Contact on WhatsApp
+            </h3>
+            {filteredLeads.slice(0, 10).map((lead: any) => (
+              <LeadCard key={lead._id} lead={lead} />
+            ))}
+          </div>
+        )}
 
         {/* Agent Performance - Admin only */}
         {user?.role === 'admin' && agentPerformance.length > 0 && (
