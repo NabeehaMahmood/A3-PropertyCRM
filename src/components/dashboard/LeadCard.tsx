@@ -135,14 +135,31 @@ export function LeadCard({ lead, onAssign }: LeadCardProps) {
 
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         <button
-          onClick={handleWhatsApp}
-          className="btn btn-secondary"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!lead.phone) {
+              alert('No phone number available');
+              return;
+            }
+            const phone = lead.phone.toString();
+            const name = lead.name || 'there';
+            const property = lead.propertyInterest || 'your property inquiry';
+            const message = `Hi ${name}, regarding your property inquiry for ${property}...`;
+            const link = getWhatsAppLink(phone, message);
+            window.location.href = link;
+          }}
           style={{
             backgroundColor: '#25D366',
             color: 'white',
             border: 'none',
             padding: '0.5rem 1rem',
             fontSize: '0.8125rem',
+            cursor: 'pointer',
+            borderRadius: '0.375rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.375rem',
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

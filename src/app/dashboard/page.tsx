@@ -400,24 +400,7 @@ function DashboardContent() {
         {/* Filters - Admin only */}
         {user?.role === 'admin' && <FilterBar onFilterChange={setFilters} />}
 
-        {/* Leads List with WhatsApp */}
-        {filteredLeads.length > 0 && (
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ 
-              fontSize: '1.125rem', 
-              fontWeight: 600, 
-              color: 'var(--color-text-primary)',
-              marginBottom: '1rem',
-            }}>
-              Your Leads - Contact on WhatsApp
-            </h3>
-            {filteredLeads.slice(0, 10).map((lead: any) => (
-              <LeadCard key={lead._id} lead={lead} />
-            ))}
-          </div>
-        )}
-
-        {/* Agent Performance - Admin only */}
+        {/* Agent Performance - Admin only (first) */}
         {user?.role === 'admin' && agentPerformance.length > 0 && (
           <div className="card" style={{ padding: '0', overflow: 'hidden', marginBottom: '2rem' }}>
             <div style={{ 
@@ -485,6 +468,23 @@ function DashboardContent() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Leads List with WhatsApp - Agents see their leads, Admin sees filtered leads */}
+        {filteredLeads.length > 0 && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ 
+              fontSize: '1.125rem', 
+              fontWeight: 600, 
+              color: 'var(--color-text-primary)',
+              marginBottom: '1rem',
+            }}>
+              {user?.role === 'admin' ? 'All Leads' : 'Your Leads'} - Contact on WhatsApp
+            </h3>
+            {filteredLeads.slice(0, 10).map((lead: any) => (
+              <LeadCard key={lead._id} lead={lead} />
+            ))}
           </div>
         )}
       </main>
