@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { getWhatsAppLink } from '@/lib/whatsapp';
 
 interface LeadCardProps {
@@ -42,8 +42,17 @@ const statusLabels: Record<string, string> = {
 };
 
 export function LeadCard({ lead, onAssign }: LeadCardProps) {
-  const handleWhatsApp = () => {
-    const link = getWhatsAppLink(lead.phone, `Hi ${lead.name}, regarding your property inquiry...`);
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!lead.phone) {
+      alert('No phone number available');
+      return;
+    }
+    const phone = lead.phone.toString();
+    const name = lead.name || 'there';
+    const property = lead.propertyInterest || 'your property inquiry';
+    const message = `Hi ${name}, regarding your property inquiry for ${property}...`;
+    const link = getWhatsAppLink(phone, message);
     window.open(link, '_blank');
   };
 
