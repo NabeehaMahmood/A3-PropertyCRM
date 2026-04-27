@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       propertyInterest,
       budget: budgetNumber.toString(),
       agentName: (lead.assignedTo as unknown as { name: string })?.name,
-    }).catch(console.error);
+    }).catch((err) => console.error('Failed to send new lead email:', err));
 
     if (lead.assignedTo) {
       sendLeadAssignmentNotification({
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
         propertyInterest,
         budget: budgetNumber.toString(),
         agentName: (lead.assignedTo as unknown as { name: string })?.name,
-      }).catch(console.error);
+      }).catch((err) => console.error('Failed to send assignment email:', err));
     }
 
     return NextResponse.json({ message: 'Lead created', lead }, { status: 201 });
