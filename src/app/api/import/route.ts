@@ -4,7 +4,7 @@ import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { User } from '@/models/User';
 import { getCurrentUser } from '@/lib/session';
-import { sendLeadAssignmentNotification } from '@/lib/email';
+import { sendNewLeadNotification, sendLeadAssignmentNotification } from '@/lib/email';
 import { logActivity } from '@/lib/activity';
 import { calculateScore } from '@/app/api/leads/route';
 
@@ -134,6 +134,14 @@ export async function POST(request: NextRequest) {
           'created',
           `Lead imported from file with ${score} priority score`
         );
+
+        sendNewLeadNotification({
+          leadName: name,
+          leadEmail: email,
+          leadPhone: phone,
+          propertyInterest,
+          budget: budget.toString(),
+        }).catch((err) => console.error('Failed to send admin email:', err));
 
         if (lead.assignedTo) {
           sendLeadAssignmentNotification({

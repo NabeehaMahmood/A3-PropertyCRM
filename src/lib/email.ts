@@ -27,9 +27,10 @@ export interface LeadEmailData {
 }
 
 export async function sendNewLeadNotification(data: LeadEmailData) {
+  const adminEmail = 'nabeehamahmood7@gmail.com';
   const mailOptions = {
     from: `PropertyCRM <${FROM_EMAIL}>`,
-    to: data.adminName || 'admin@propertycrm.com',
+    to: adminEmail,
     subject: 'New Lead Created - Attention Required',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
