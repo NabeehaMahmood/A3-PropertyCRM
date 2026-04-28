@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { getCurrentUser } from '@/lib/session';
-import { canViewAll, Role } from '@/lib/rbac';
+import { canViewAll, canUpdateLead, Role } from '@/lib/rbac';
 import { logActivity } from '@/lib/activity';
 
 export async function POST(
@@ -13,6 +13,10 @@ export async function POST(
     const user = getCurrentUser(request);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!canUpdateLead(user.role as Role)) {
+      return NextResponse.json({ error: 'Forbidden: Agents cannot schedule follow-ups' }, { status: 403 });
     }
 
     const { id } = await params;
@@ -80,6 +84,10 @@ export async function PATCH(
     const user = getCurrentUser(request);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!canUpdateLead(user.role as Role)) {
+      return NextResponse.json({ error: 'Forbidden: Agents cannot update follow-ups' }, { status: 403 });
     }
 
     const { id } = await params;

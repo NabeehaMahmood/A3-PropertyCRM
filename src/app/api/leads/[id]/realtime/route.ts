@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { getCurrentUser } from '@/lib/session';
+import { canUpdateLead, Role } from '@/lib/rbac';
 
 export async function GET(
   request: NextRequest,
@@ -33,6 +34,10 @@ export async function PUT(
   
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (!canUpdateLead(user.role as Role)) {
+    return NextResponse.json({ error: 'Forbidden: Agents cannot update leads' }, { status: 403 });
   }
 
   const { id } = await params;

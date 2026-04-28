@@ -4,7 +4,7 @@ export const ROLES: Role[] = ['admin', 'agent'];
 
 export const ROLE_PERMISSIONS = {
   admin: ['create', 'read', 'update', 'delete', 'assign', 'view_all'],
-  agent: ['create', 'read', 'update_own'],
+  agent: ['read', 'view_own', 'contact'],
 } as const;
 
 export function hasPermission(role: Role, permission: string): boolean {
@@ -22,4 +22,20 @@ export function canAssign(role: Role): boolean {
 
 export function isAdmin(role: Role): boolean {
   return role === 'admin';
+}
+
+export function canCreateLead(role: Role): boolean {
+  return role === 'admin';
+}
+
+export function canUpdateLead(role: Role): boolean {
+  return role === 'admin';
+}
+
+export function canDeleteLead(role: Role): boolean {
+  return role === 'admin';
+}
+
+export function canContactLead(role: Role): boolean {
+  return role === 'agent' || role === 'admin';
 }

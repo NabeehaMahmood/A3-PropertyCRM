@@ -3,7 +3,7 @@ import connectToDatabase from '@/lib/db';
 import { Lead } from '@/models/Lead';
 import { User } from '@/models/User';
 import { getCurrentUser } from '@/lib/session';
-import { canViewAll, canAssign, Role } from '@/lib/rbac';
+import { canViewAll, canAssign, canCreateLead, Role } from '@/lib/rbac';
 import { sendNewLeadNotification, sendLeadAssignmentNotification } from '@/lib/email';
 import { logActivity } from '@/lib/activity';
 import { rateLimitMiddleware } from '@/lib/rateLimit';
@@ -113,6 +113,10 @@ export async function POST(request: NextRequest) {
     // Rate limit check
     const rateLimitResponse = rateLimitMiddleware(request, user.role);
     if (rateLimitResponse) return rateLimitResponse;
+
+    if (!canCreateLead(user.role as Role)) {
+      return NextResponse.json({ error: 'Forbidden: Agents cannot create leads' }, { status: 403 });
+    }
 
     const { name, email, phone, propertyInterest, budget, notes, source, followUpDate, assignedTo } = await request.json();
 

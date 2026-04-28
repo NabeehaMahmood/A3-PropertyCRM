@@ -145,15 +145,31 @@ export default function LeadsPage() {
       return;
     }
 
+    const parsedUser = JSON.parse(userData || '{}');
+    if (parsedUser.role === 'agent') {
+      router.push('/my-leads');
+      return;
+    }
+
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(parsedUser);
     }
 
     fetchLeads();
-    if (JSON.parse(userData || '{}').role === 'admin') {
+    if (parsedUser.role === 'admin') {
       fetchAgents();
     }
   }, [router, fetchLeads]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const debounce = setTimeout(() => {

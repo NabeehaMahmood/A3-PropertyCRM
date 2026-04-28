@@ -178,15 +178,17 @@ function DashboardContent() {
             >
               Dashboard
             </Link>
-            <Link
-              href="/leads"
-              style={{
-                color: 'var(--color-text-secondary)',
-                fontSize: '0.875rem',
-              }}
-            >
-              Leads
-            </Link>
+            {user?.role === 'admin' && (
+              <Link
+                href="/leads"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                Leads
+              </Link>
+            )}
             {user?.role === 'agent' && (
               <Link
                 href="/my-leads"
@@ -493,8 +495,8 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Leads List with WhatsApp - Agents see their leads, Admin sees filtered leads */}
-        {filteredLeads.length > 0 && (
+        {/* Leads List with WhatsApp - Admin only (agents use My Leads page) */}
+        {user?.role === 'admin' && filteredLeads.length > 0 && (
           <div style={{ marginBottom: '2rem' }}>
             <h3 style={{ 
               fontSize: '1.125rem', 
@@ -502,7 +504,7 @@ function DashboardContent() {
               color: 'var(--color-text-primary)',
               marginBottom: '1rem',
             }}>
-              {user?.role === 'admin' ? 'All Leads' : 'Your Leads'} - Contact on WhatsApp
+              All Leads - Contact on WhatsApp
             </h3>
             {filteredLeads.slice(0, 10).map((lead: any) => (
               <LeadCard key={lead._id} lead={lead} />
