@@ -168,38 +168,60 @@ function DashboardContent() {
             PropertyCRM
           </h1>
           <nav style={{ display: 'flex', gap: '1.5rem' }}>
-            <Link 
-              href="/dashboard" 
-              style={{ 
-                color: 'var(--color-primary)', 
+            <Link
+              href="/dashboard"
+              style={{
+                color: 'var(--color-primary)',
                 fontWeight: 600,
                 fontSize: '0.875rem',
               }}
             >
               Dashboard
             </Link>
-            <Link 
-              href="/leads" 
-              style={{ 
-                color: 'var(--color-text-secondary)', 
+            <Link
+              href="/leads"
+              style={{
+                color: 'var(--color-text-secondary)',
                 fontSize: '0.875rem',
               }}
             >
               Leads
             </Link>
-            <Link 
-              href="/overdue" 
-              style={{ 
-                color: 'var(--color-text-secondary)', 
+            {user?.role === 'agent' && (
+              <Link
+                href="/my-leads"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                My Leads
+              </Link>
+            )}
+            {user?.role === 'admin' && (
+              <Link
+                href="/import"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                Import
+              </Link>
+            )}
+            <Link
+              href="/overdue"
+              style={{
+                color: 'var(--color-text-secondary)',
                 fontSize: '0.875rem',
               }}
             >
               Follow-ups
             </Link>
-            <Link 
-              href="/activities" 
-              style={{ 
-                color: 'var(--color-text-secondary)', 
+            <Link
+              href="/activities"
+              style={{
+                color: 'var(--color-text-secondary)',
                 fontSize: '0.875rem',
               }}
             >
