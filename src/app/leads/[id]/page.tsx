@@ -383,9 +383,16 @@ export default function LeadDetailPage() {
             <a href="/dashboard" style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
               Dashboard
             </a>
-            <a href="/leads" style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.875rem' }}>
-              Leads
-            </a>
+            {user?.role === 'admin' && (
+              <a href="/leads" style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.875rem' }}>
+                Leads
+              </a>
+            )}
+            {user?.role === 'agent' && (
+              <a href="/my-leads" style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.875rem' }}>
+                My Leads
+              </a>
+            )}
             <a href="/overdue" style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
               Follow-ups
             </a>
