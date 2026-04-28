@@ -128,6 +128,8 @@ export async function POST(request: NextRequest) {
 
         await lead.populate('assignedTo', 'name email');
 
+        const agentEmail = (lead.assignedTo as any)?.email;
+
         await logActivity(
           lead._id.toString(),
           user.userId,
@@ -143,14 +145,14 @@ export async function POST(request: NextRequest) {
           budget: budget.toString(),
         }).catch((err) => console.error('Failed to send admin email:', err));
 
-        if (lead.assignedTo) {
+        if (lead.assignedTo && agentEmail) {
           sendLeadAssignmentNotification({
             leadName: name,
             leadEmail: email,
             leadPhone: phone,
             propertyInterest,
             budget: budget.toString(),
-            agentName: (lead.assignedTo as any)?.name,
+            agentEmail: agentEmail,
           }).catch((err) => console.error('Failed to send assignment email:', err));
         }
 

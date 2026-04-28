@@ -23,6 +23,7 @@ export interface LeadEmailData {
   propertyInterest: string;
   budget: string;
   agentName?: string;
+  agentEmail?: string;
   adminName?: string;
 }
 
@@ -53,9 +54,10 @@ export async function sendNewLeadNotification(data: LeadEmailData) {
 }
 
 export async function sendLeadAssignmentNotification(data: LeadEmailData) {
+  const recipientEmail = data.agentEmail || 'agent@propertycrm.com';
   const mailOptions = {
     from: `PropertyCRM <${FROM_EMAIL}>`,
-    to: data.agentName ? `${data.agentName} <agent@propertycrm.com>` : 'agent@propertycrm.com',
+    to: recipientEmail,
     subject: 'New Lead Assigned - Action Required',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
