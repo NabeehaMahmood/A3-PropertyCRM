@@ -29,10 +29,25 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(worksheet);
+    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    let data: any[];
+    
+    if (isCsv) {
+      const text = new TextDecoder().decode(buffer);
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',').map(h => h.trim());
+      data = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const obj: Record<string, string> = {};
+        headers.forEach((h, i) => { obj[h] = values[i] || ''; });
+        return obj;
+      });
+    } else {
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      data = XLSX.utils.sheet_to_json(worksheet);
+    }
 
     if (data.length === 0) {
       return NextResponse.json({ error: 'File is empty' }, { status: 400 });
