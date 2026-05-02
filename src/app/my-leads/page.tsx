@@ -614,7 +614,7 @@ export default function MyLeadsPage() {
               </div>
             </form>
           </div>
-        )}
+        </div>
       )}
 
       {/* AI Suggestions Modal */}
