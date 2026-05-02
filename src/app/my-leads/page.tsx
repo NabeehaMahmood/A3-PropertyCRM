@@ -45,6 +45,8 @@ export default function MyLeadsPage() {
   const [newStatus, setNewStatus] = useState('');
   const [newFollowUpDate, setNewFollowUpDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const router = useRouter();
 
   const fetchLeads = useCallback(async () => {
@@ -72,6 +74,18 @@ export default function MyLeadsPage() {
     }
   }, [filters]);
 
+  const fetchSuggestions = async () => {
+    try {
+      const res = await fetch('/api/suggestions', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      const data = await res.json();
+      if (data.suggestions) setSuggestions(data.suggestions);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
@@ -87,6 +101,7 @@ export default function MyLeadsPage() {
     }
 
     fetchLeads();
+    fetchSuggestions();
   }, [router, fetchLeads]);
 
   useEffect(() => {
@@ -246,6 +261,32 @@ export default function MyLeadsPage() {
           </nav>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            onClick={() => setShowSuggestions(true)}
+            className="btn btn-ghost"
+            style={{ border: '1px solid var(--color-border)', position: 'relative' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            AI Suggestions
+            {suggestions.length > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: 'var(--color-error)',
+                color: 'white',
+                fontSize: '0.625rem',
+                padding: '0.125rem 0.375rem',
+                borderRadius: '9999px',
+              }}>
+                {suggestions.length}
+              </span>
+            )}
+          </button>
           <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
             {user?.name} <span style={{ textTransform: 'capitalize', color: 'var(--color-primary)', fontWeight: 500 }}>({user?.role})</span>
           </span>
@@ -567,11 +608,69 @@ export default function MyLeadsPage() {
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
                   Update Lead
                 </button>
-                <button type="button" onClick={() => setShowStatusModal(false)} className="btn btn-secondary" style={{ flex: 1 }}>
+<button type="button" onClick={() => setShowStatusModal(false)} className="btn btn-secondary" style={{ flex: 1 }}>
                   Cancel
                 </button>
               </div>
             </form>
+          </div>
+        )}
+      )}
+
+      {/* AI Suggestions Modal */}
+      {showSuggestions && (
+        <div className="modal-overlay animate-fadeIn" onClick={() => setShowSuggestions(false)}>
+          <div className="modal-content animate-scaleIn" style={{ padding: '1.5rem', width: '100%', maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text-primary)', fontFamily: 'Cinzel, serif' }}>
+              AI Follow-up Suggestions
+            </h3>
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              {suggestions.length === 0 ? (
+                <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '2rem' }}>
+                  No suggestions at this time. Great job keeping up with your leads!
+                </p>
+              ) : (
+                suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setShowSuggestions(false);
+                      router.push(`/leads/${suggestion.leadId}`);
+                    }}
+                    style={{
+                      padding: '1rem',
+                      textAlign: 'left',
+                      background: 'var(--color-bg-secondary)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '0.5rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{suggestion.leadName}</span>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        background: 'var(--color-primary)',
+                        color: 'white',
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: '9999px',
+                      }}>
+                        Priority: {suggestion.priority}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+                      {suggestion.reason}
+                    </p>
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--color-primary)', fontWeight: 500 }}>
+                      {suggestion.action}
+                    </p>
+                  </button>
+                ))
+              )}
+            </div>
+            <button onClick={() => setShowSuggestions(false)} className="btn btn-secondary" style={{ width: '100%', marginTop: '1rem' }}>
+              Close
+            </button>
           </div>
         </div>
       )}
